@@ -1,6 +1,5 @@
 // Collatz in C
 #include<stdio.h>
-#include<stdlib.h>
 
 // Memo entry structure
 typedef struct memoEntry {
@@ -9,11 +8,11 @@ typedef struct memoEntry {
 } memoEntry;
 
 // Memoized collatz
-int collatz(long seed, struct memoEntry *memos) {
+static int collatz(long seed, struct memoEntry *memos) {
     int steps = 0;
     memoEntry entry;
     while(seed > 1) {
-        entry = memos[seed % 200000];
+        entry = memos[seed % 500000];
         if(entry.steps>0 && entry.entry==seed) {
             steps += entry.steps;
             break;
@@ -30,12 +29,12 @@ int collatz(long seed, struct memoEntry *memos) {
 }
 
 int main(void) {
-    memoEntry memo[200000];
-    for(long i = 0; i<1000000; i++) {
+    memoEntry memo[500000];
+    for(long i = 1; i<100000000; i++) {
         int steps = collatz(i,&memo[0]);
-        memo[i % 200000].entry = i;
-        memo[i % 200000].steps = steps;
-        if(i % 100000 == 0) printf("Seed:%ld Steps:%d\n",i,steps);
+        memo[i % 500000].entry = i;
+        memo[i % 500000].steps = steps;
+        if(i % 500000 == 0) printf("Seed:%ld Steps:%d\n",i,steps);
     }
     return 0;
 }
