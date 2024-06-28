@@ -3,12 +3,12 @@
 
 static unsigned long factorial(int num) {
     unsigned long fact = 1;
-    for(unsigned long i = 2; i<=num; ++i) fact *= i;
+    for(unsigned long i = 2; i<=num; i++) fact *= i;
     return fact;
 }
 
 int main(void) {
-    for(int i = 1; i<10000; i++) {
+    for(int i = 1; i<1000; i++) {
         printf("Int:%d, Fact:%lu\n",i,factorial(i));
     }
     return 0;
