@@ -7,6 +7,7 @@
 #define BULLET_UP 0
 #define BULLET_DOWN 1
 #define MAX_PLAYER_BULLETS 5
+#define MAX_PLAYER_LIVES 3
 #define MAX_INVADERS 48
 
 // Types
@@ -17,7 +18,7 @@ typedef struct bullet {
 } bullet;
 
 typedef struct player {
-    int oldX, oldY, X, Y, maxX, maxY;
+    int oldX, oldY, X, Y, maxX, maxY, lives, score;
     bullet bullets[MAX_PLAYER_BULLETS];
 } player;
 
@@ -38,6 +39,20 @@ void drawPlayer(player Player) {
     mvprintw(Player.Y, Player.X-2, "--!--");
     Player.oldX = Player.X;
     Player.oldY = Player.Y;
+}
+
+void initPlayer(player *Player, int rows, int cols) {
+    int i = 0;
+    Player->maxX = cols;
+    Player->maxY = rows-2;
+    Player->oldX = cols/2;
+    Player->oldY = rows-2;
+    Player->X = cols/2;
+    Player->Y = rows-2;
+    Player->lives = MAX_PLAYER_LIVES;
+    for(i=0; i<MAX_PLAYER_BULLETS; i++) {
+        Player->bullets[i].active = false;
+    }
 }
 
 void drawInvaders(invader *Invaders) {
@@ -72,7 +87,7 @@ void drawBullets(player *Player) {
     for(b = 0; b < MAX_PLAYER_BULLETS; b++) {
         if(Player->bullets[b].active) {
             mvprintw(Player->bullets[b].oldY, Player->bullets[b].oldX, " ");
-            mvprintw(Player->bullets[b].Y, Player->bullets[b].X, ".");
+            mvprintw(Player->bullets[b].Y, Player->bullets[b].X, "|");
             Player->bullets[b].oldX = Player->bullets[b].X;
             Player->bullets[b].oldY = Player->bullets[b].Y;
         }
@@ -111,6 +126,17 @@ void drawScores() {
     // TODO: Score/HUD rendering code
 }
 
+void initScreen(int *actRows, int* actCols) {
+    initscr();
+    getmaxyx(stdscr, *actRows, *actCols);
+    clear();
+    curs_set(0);
+    cbreak();
+    noecho();
+    nodelay(stdscr, TRUE);
+    refresh();
+}
+
 bool checkCollisions() {
     // TODO: Add collision checking code for invaders and bullets
     return true;
@@ -143,8 +169,9 @@ bool pollInput(player *Player) {
                     Player->bullets[b].oldX = Player->X;
                     Player->bullets[b].oldY = Player->Y-1;
                     Player->bullets[b].X = Player->X;
-                    Player->bullets[b].Y = Player->Y;
+                    Player->bullets[b].Y = Player->Y-1;
                     Player->bullets[b].active = true;
+                    Player->bullets[b].direction = BULLET_UP;
                     break;
                 }
             }
@@ -156,31 +183,15 @@ bool pollInput(player *Player) {
 
 int main(void) {
     bool isRunning = true;
-    int rows, cols, frame_timer;
+    int rows, cols;
+    int frame_timer = 0;
     player Player;
     invader Invaders[MAX_INVADERS];
 
-    // Init Screen
-    initscr();
-    getmaxyx(stdscr, rows, cols);
-    clear();
-    curs_set(0);
-    cbreak();
-    noecho();
-    nodelay(stdscr, TRUE);
-    refresh();
-
-    // Init Invaders
+    // Init Game
+    initScreen(&rows, &cols);
     initInvaders(&Invaders[0], cols);
-
-    // Init Player
-    Player.maxX = cols;
-    Player.maxY = rows-1;
-    Player.oldX = cols/2;
-    Player.oldY = rows-1;
-    Player.X = cols/2;
-    Player.Y = rows-1;
-    frame_timer = 0;
+    initPlayer(&Player, rows, cols);
 
     // Main Loop
     while(isRunning) {
@@ -190,7 +201,7 @@ int main(void) {
         drawInvaders(&Invaders[0]);
         drawBullets(&Player);
         isRunning = checkCollisions();
-        if(frame_timer  == 0) moveBullets(&Player);
+        if(frame_timer == 0) moveBullets(&Player);
         drawScores();
         isRunning = pollInput(&Player);
         refresh();
