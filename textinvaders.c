@@ -1,5 +1,6 @@
 // Text based Space Invaders
 #include<stdio.h>
+#include<string.h>
 #include<stdbool.h>
 #include<ncurses.h>
 
@@ -50,6 +51,7 @@ void initPlayer(player *Player, int rows, int cols) {
     Player->X = cols/2;
     Player->Y = rows-2;
     Player->lives = MAX_PLAYER_LIVES;
+    Player->score = 0;
     for(i=0; i<MAX_PLAYER_BULLETS; i++) {
         Player->bullets[i].active = false;
     }
@@ -122,8 +124,17 @@ void moveBullets(player *Player) {
     }
 }
 
-void drawScores() {
-    // TODO: Score/HUD rendering code
+void drawScores(player *Player, int maxCols) {
+    char hud[maxCols+1];
+    int i = 0;
+    for(i = 0; i<maxCols; i++) hud[i] = ' ';
+    hud[maxCols] = 0;
+    snprintf(hud, sizeof(hud), " Text Invaders!  SCORE:%05d  LIVES: ", Player->score);
+    for(i = 0; i<Player->lives; i++) strcat(hud, "--!--   ");
+    hud[strlen(hud)] = ' ';
+    attron(A_REVERSE);
+    mvprintw(Player->maxY+1,0,hud);
+    attroff(A_REVERSE);
 }
 
 void initScreen(int *actRows, int* actCols) {
@@ -202,7 +213,7 @@ int main(void) {
         drawBullets(&Player);
         isRunning = checkCollisions();
         if(frame_timer == 0) moveBullets(&Player);
-        drawScores();
+        drawScores(&Player, cols);
         isRunning = pollInput(&Player);
         refresh();
         frame_timer++;
