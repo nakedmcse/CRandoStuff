@@ -7,6 +7,7 @@
 #define BULLET_UP 0
 #define BULLET_DOWN 1
 #define MAX_PLAYER_BULLETS 5
+#define MAX_INVADERS 48
 
 // Types
 typedef struct bullet {
@@ -20,11 +21,16 @@ typedef struct player {
     bullet bullets[MAX_PLAYER_BULLETS];
 } player;
 
+typedef struct invader {
+    int oldX, oldY, X, Y;
+    bool active;
+    bullet bullet;
+} invader;
+
 // Funcs
 
 void drawBases() {
     // TODO: Bases rendering code
-    return;
 }
 
 void drawPlayer(player Player) {
@@ -32,12 +38,33 @@ void drawPlayer(player Player) {
     mvprintw(Player.Y, Player.X-2, "--!--");
     Player.oldX = Player.X;
     Player.oldY = Player.Y;
-    return;
 }
 
-void drawInvaders() {
-    // TODO: Invader rendering code
-    return;
+void drawInvaders(invader *Invaders) {
+    int i = 0;
+    for(i = 0; i < MAX_INVADERS; i++) {
+        if(!Invaders[i].active) continue;
+        mvprintw(Invaders[i].oldY, Invaders[i].oldX-2, "     ");
+        mvprintw(Invaders[i].Y, Invaders[i].X-2, "(-O-)");
+        Invaders[i].oldX = Invaders[i].X;
+        Invaders[i].oldY = Invaders[i].Y;
+    }
+}
+
+void moveInvaders() {
+    // TODO: Invader movement code
+}
+
+void initInvaders(invader *Invaders, int maxCols) {
+    int i = 0;
+    int perLine = (maxCols - 20)/10;
+    for(i = 0; i < MAX_INVADERS; i++) {
+        Invaders[i].active = true;
+        Invaders[i].X = ((i % perLine) * 10) + 10;
+        Invaders[i].Y = (i / perLine) * 2;
+        Invaders[i].oldX = Invaders[i].X;
+        Invaders[i].oldY = Invaders[i].Y;
+    }
 }
 
 void drawBullets(player *Player) {
@@ -50,7 +77,6 @@ void drawBullets(player *Player) {
             Player->bullets[b].oldY = Player->bullets[b].Y;
         }
     }
-    return;
 }
 
 void moveBullets(player *Player) {
@@ -79,17 +105,10 @@ void moveBullets(player *Player) {
             }
         }
     }
-    return;
 }
 
 void drawScores() {
     // TODO: Score/HUD rendering code
-    return;
-}
-
-void moveInvaders() {
-    // TODO: Invader movement code
-    return;
 }
 
 bool checkCollisions() {
@@ -139,7 +158,9 @@ int main(void) {
     bool isRunning = true;
     int rows, cols, frame_timer;
     player Player;
+    invader Invaders[MAX_INVADERS];
 
+    // Init Screen
     initscr();
     getmaxyx(stdscr, rows, cols);
     clear();
@@ -149,7 +170,10 @@ int main(void) {
     nodelay(stdscr, TRUE);
     refresh();
 
-    // Init locs
+    // Init Invaders
+    initInvaders(&Invaders[0], cols);
+
+    // Init Player
     Player.maxX = cols;
     Player.maxY = rows-1;
     Player.oldX = cols/2;
@@ -163,7 +187,7 @@ int main(void) {
         drawBases();
         drawPlayer(Player);
         moveInvaders();
-        drawInvaders();
+        drawInvaders(&Invaders[0]);
         drawBullets(&Player);
         isRunning = checkCollisions();
         if(frame_timer  == 0) moveBullets(&Player);
