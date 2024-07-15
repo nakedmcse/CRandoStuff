@@ -7,6 +7,8 @@
 // Defs
 #define BULLET_UP 0
 #define BULLET_DOWN 1
+#define INVADER_LEFT -1
+#define INVADER_RIGHT 1
 #define MAX_PLAYER_BULLETS 5
 #define MAX_PLAYER_LIVES 3
 #define MAX_INVADERS 48
@@ -30,9 +32,13 @@ typedef struct invader {
 } invader;
 
 // Funcs
-
-void drawBases() {
-    // TODO: Bases rendering code
+void initBases(int rows, int cols) {
+    int i = 0;
+    int perLine = (cols - 20)/10;
+    for(i = 0; i<perLine; i++) {
+        mvprintw(rows-4, (i*10)+10, "#####");
+        mvprintw(rows-3, (i*10)+10, "#####");
+    }
 }
 
 void drawPlayer(player Player) {
@@ -68,8 +74,23 @@ void drawInvaders(invader *Invaders) {
     }
 }
 
-void moveInvaders() {
-    // TODO: Invader movement code
+void moveInvaders(invader *Invaders, int *direction, int maxCol) {
+    int i = 0;
+    bool moveDown = false;
+    for(i = 0; i < MAX_INVADERS; i++) {
+        if(!Invaders[i].active) continue;
+        Invaders[i].oldX = Invaders[i].X;
+        Invaders[i].oldY = Invaders[i].Y;
+        Invaders[i].X += *direction;
+        moveDown = (Invaders[i].X == 0 || Invaders[i].X == maxCol-5 || moveDown);
+    }
+    if (moveDown) {
+        *direction = 0-*direction;
+        for(i = 0; i < MAX_INVADERS; i++) {
+            if(!Invaders[i].active) continue;
+            Invaders[i].Y++;
+        }
+    }
 }
 
 void initInvaders(invader *Invaders, int maxCols) {
@@ -196,6 +217,7 @@ int main(void) {
     bool isRunning = true;
     int rows, cols;
     int frame_timer = 0;
+    int invaderDirection = INVADER_LEFT;
     player Player;
     invader Invaders[MAX_INVADERS];
 
@@ -203,12 +225,12 @@ int main(void) {
     initScreen(&rows, &cols);
     initInvaders(&Invaders[0], cols);
     initPlayer(&Player, rows, cols);
+    initBases(rows, cols);
 
     // Main Loop
     while(isRunning) {
-        drawBases();
         drawPlayer(Player);
-        moveInvaders();
+        if(frame_timer == 0) moveInvaders(&Invaders[0], &invaderDirection, cols);
         drawInvaders(&Invaders[0]);
         drawBullets(&Player);
         isRunning = checkCollisions();
