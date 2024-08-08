@@ -1,4 +1,4 @@
-//  Use Dynamic Programming to figure out steps path for 1 or 2 steps on stair size 1->n->MAXSTEPS
+//  Figure out steps path for 1 or 2 steps on stair size 1->n->MAXSTEPS
 #include<stdio.h>
 #define MAXSTEPS 5
 
