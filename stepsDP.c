@@ -9,8 +9,37 @@ typedef struct list {
     struct list *next;
 } list;
 
+typedef struct arrayList {
+    int *values;
+    int headIdx, tailIdx, maxIdx;
+} arrayList;
+
+void initArrayList(arrayList *queue) {
+    queue->values = NULL;
+    queue->headIdx = 0;
+    queue->tailIdx = 0;
+    queue->maxIdx = 10000;
+}
+
+void appendArrayList(int value, arrayList *queue) {
+    if(queue->values == NULL) queue->values = (int *)malloc(10000 * sizeof(int));
+    if(queue->tailIdx > queue->maxIdx) {
+        printf("Attempting realloc\n");
+        queue->values = (int *)realloc(queue->values, (queue->maxIdx + 10000) * sizeof(int));
+        queue->maxIdx += 10000;
+    }
+    queue->values[queue->tailIdx] = value;
+    queue->tailIdx += 1;
+}
+
+int dequeueArrayList(arrayList *queue) {
+    if(queue->values == NULL || queue->headIdx == queue->tailIdx) return -1;
+    queue->headIdx += 1;
+    return queue->values[queue->headIdx-1];
+}
+
 list *appendList(int value, list **queue, list *tail) {
-    struct list *head = *queue;
+    list *head = *queue;
     if(head == NULL) {
         *queue = malloc(sizeof(struct list));
         head = *queue;
@@ -18,7 +47,7 @@ list *appendList(int value, list **queue, list *tail) {
         head->next = NULL;
         return head;
     }
-    struct list *new = malloc(sizeof(struct list));
+    list *new = malloc(sizeof(struct list));
     new->value = value;
     new->next = NULL;
     if(tail) {
@@ -30,7 +59,7 @@ list *appendList(int value, list **queue, list *tail) {
     return new;
 }
 
-int dequeueList(struct list **list) {
+int dequeueList(list **list) {
     struct list *head = *list;
     if(head == NULL) return -1;
     int retval = head->value;
@@ -48,18 +77,21 @@ int checkStepsRecursive(int step) {
 
 // Queue Solution
 int checkStepsQueue() {
-    list *queue = NULL, *tail = NULL;
-    tail = appendList(0, &queue, NULL);
+    //list *queue = NULL, *tail = NULL;
+    //tail = appendList(0, &queue, NULL);
+    static arrayList queue;
+    initArrayList(&queue);
+    appendArrayList(0, &queue);
     int solutions = 0;
-    while(queue) {
-        int value = dequeueList(&queue);
+    while(queue.tailIdx > queue.headIdx) {
+        int value = dequeueArrayList(&queue);
         if(value > MAXSTEPS) continue;
         if(value == MAXSTEPS) {
             solutions++;
             continue;
         }
-        tail = appendList(value+1, &queue, tail);
-        tail = appendList(value+2, &queue, tail);
+        appendArrayList(value+1, &queue);
+        appendArrayList(value+2, &queue);
     }
     return solutions;
 }
