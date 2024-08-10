@@ -1,8 +1,10 @@
 //  Figure out steps path for 1 or 2 steps on stair size 1->n->MAXSTEPS
 #include<stdio.h>
 #include<stdlib.h>
+#include<string.h>
 #include<time.h>
-#define MAXSTEPS 35
+#define MAXSTEPS 40
+#define BLOCKSIZE 100000
 
 typedef struct list {
     int value;
@@ -10,34 +12,40 @@ typedef struct list {
 } list;
 
 typedef struct arrayList {
-    int *values;
+    char *values;
     int headIdx, tailIdx, maxIdx;
 } arrayList;
 
+// ArrayList functions
 void initArrayList(arrayList *queue) {
     queue->values = NULL;
     queue->headIdx = 0;
     queue->tailIdx = 0;
-    queue->maxIdx = 10000;
+    queue->maxIdx = BLOCKSIZE;
 }
 
-void appendArrayList(int value, arrayList *queue) {
-    if(queue->values == NULL) queue->values = (int *)malloc(10000 * sizeof(int));
-    if(queue->tailIdx > queue->maxIdx) {
-        printf("Attempting realloc\n");
-        queue->values = (int *)realloc(queue->values, (queue->maxIdx + 10000) * sizeof(int));
-        queue->maxIdx += 10000;
+void appendArrayList(char value, arrayList *queue) {
+    if (queue->values == NULL) queue->values = (char *)malloc(BLOCKSIZE);
+    if (queue->tailIdx >= queue->maxIdx) {
+        char *new_values = (char *)realloc(queue->values, (queue->maxIdx + BLOCKSIZE));
+        if (new_values == NULL) {
+            free(queue->values);
+            fprintf(stderr, "Memory allocation failed during realloc\n");
+            exit(EXIT_FAILURE);
+        }
+        queue->values = new_values;
+        queue->maxIdx += BLOCKSIZE;
     }
     queue->values[queue->tailIdx] = value;
     queue->tailIdx += 1;
 }
 
-int dequeueArrayList(arrayList *queue) {
+char dequeueArrayList(arrayList *queue) {
     if(queue->values == NULL || queue->headIdx == queue->tailIdx) return -1;
-    queue->headIdx += 1;
-    return queue->values[queue->headIdx-1];
+    return queue->values[queue->headIdx++];
 }
 
+// List functions
 list *appendList(int value, list **queue, list *tail) {
     list *head = *queue;
     if(head == NULL) {
@@ -75,16 +83,14 @@ int checkStepsRecursive(int step) {
     return checkStepsRecursive(step+1) + checkStepsRecursive(step+2);
 }
 
-// Queue Solution
-int checkStepsQueue() {
-    //list *queue = NULL, *tail = NULL;
-    //tail = appendList(0, &queue, NULL);
+// Arraylist Solution
+int checkStepsArraylist() {
     static arrayList queue;
     initArrayList(&queue);
     appendArrayList(0, &queue);
     int solutions = 0;
     while(queue.tailIdx > queue.headIdx) {
-        int value = dequeueArrayList(&queue);
+        char value = dequeueArrayList(&queue);
         if(value > MAXSTEPS) continue;
         if(value == MAXSTEPS) {
             solutions++;
@@ -92,6 +98,25 @@ int checkStepsQueue() {
         }
         appendArrayList(value+1, &queue);
         appendArrayList(value+2, &queue);
+    }
+    free(queue.values);
+    return solutions;
+}
+
+// List Solution
+int checkStepsList() {
+    list *queue = NULL, *tail = NULL;
+    tail = appendList(0, &queue, NULL);
+    int solutions = 0;
+    while(queue) {
+        int value = dequeueList(&queue);
+        if(value > MAXSTEPS) continue;
+        if(value == MAXSTEPS) {
+            solutions++;
+            continue;
+        }
+        tail = appendList(value+1, &queue, tail);
+        tail = appendList(value+2, &queue, tail);
     }
     return solutions;
 }
@@ -116,8 +141,12 @@ int main(void) {
     double elapsedR = (double)(clock() - start_time) / CLOCKS_PER_SEC;
 
     start_time = clock();
-    int solCountQ = checkStepsQueue();
-    double elapsedQ = (double)(clock() - start_time) / CLOCKS_PER_SEC;
+    int solCountAR = checkStepsArraylist();
+    double elapsedAR = (double)(clock() - start_time) / CLOCKS_PER_SEC;
+
+    start_time = clock();
+    int solCountL = checkStepsList();
+    double elapsedL = (double)(clock() - start_time) / CLOCKS_PER_SEC;
 
     start_time = clock();
     int solCountDP = checkStepsDP();
@@ -125,7 +154,8 @@ int main(void) {
 
     printf("%d steps\n", MAXSTEPS);
     printf("%d recursive solutions in %fs\n", solCountR, elapsedR);
-    printf("%d queue solutions in %fs\n", solCountQ, elapsedQ);
+    printf("%d array list solutions in %fs\n", solCountAR, elapsedAR);
+    printf("%d list solutions in %fs\n", solCountL, elapsedL);
     printf("%d DP solutions in %fs\n", solCountDP, elapsedDP);
     return 0;
 }
