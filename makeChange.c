@@ -3,8 +3,8 @@
 #include<stdlib.h>
 #include<stdbool.h>
 #include<time.h>
-#define MAXCHANGER 10
-#define MAXCHANGEDP 10
+#define MAXCHANGER 60
+#define MAXCHANGEDP 99
 
 // Recursive solution
 long makeChangeRecursive(int value, int coins, bool solutions) {
