@@ -3,14 +3,14 @@
 #include<stdlib.h>
 #include<stdbool.h>
 #include<time.h>
-#define MAXCHANGER 60
-#define MAXCHANGEDP 99
+#define MAXCHANGER 10
+#define MAXCHANGEDP 10
 
 // Recursive solution
 long makeChangeRecursive(int value, int coins, bool solutions) {
-    coins++;
     if (value > MAXCHANGER) return 0;                        // Bust
     if (value == MAXCHANGER) return solutions ? 1 : coins;   // Change made
+    coins++;
     return makeChangeRecursive(value+1, coins, solutions) + makeChangeRecursive(value+5, coins, solutions) +
         makeChangeRecursive(value+10, coins, solutions) + makeChangeRecursive(value+25, coins, solutions);
 }
@@ -20,8 +20,8 @@ long makeChangeDP(bool solutions) {
     long dp[MAXCHANGEDP + 1] = {0};
     long coins[MAXCHANGEDP + 1] = {0};
 
-    dp[1] = 1; // There is one way to make change for 0 value
-    coins[0] = 1; // Start with one coin
+    dp[0] = 1; // There is one way to make change for 0 value
+    coins[0] = 0; // Start with no coins
 
     // Fill the DP table using the coin denominations
     for (int i = 1; i <= MAXCHANGEDP; i++) {
@@ -48,8 +48,8 @@ long makeChangeDP(bool solutions) {
 
 int main(void) {
     clock_t start_time = clock();
-    long totalCoins = makeChangeRecursive(1, 1, false);
-    long totalSolutions = makeChangeRecursive(1, 1, true);
+    long totalCoins = makeChangeRecursive(0, 0, false);
+    long totalSolutions = makeChangeRecursive(0, 0, true);
     double elapsedR = (double)(clock() - start_time) / CLOCKS_PER_SEC;
 
     start_time = clock();
