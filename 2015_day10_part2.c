@@ -4,32 +4,36 @@
 #include<stdlib.h>
 
 char *runLenEncode(const char *s) {
-    char *retval = (char *)malloc(strlen(s) * 2 + 1);
-    char append[16];
-    retval[0] = '\0';
+    int n = strlen(s);
+    char *retval = (char *)malloc(n * 2 + 1);
     char cur, prev = s[0];
-    int runlen = 1;
-    for(int i = 1; i < strlen(s); i++) {
+    int runlen = 1, rp = 0;
+    for(int i = 1; i < n; i++) {
         cur = s[i];
         if(runlen > 9) {
-            snprintf(append, sizeof(append), "9%c", prev);
-            strcat(retval, append);
+            retval[rp] = '9';
+            retval[++rp] = prev;
+            rp++;
             runlen = 1;
         }
         if(cur == prev) {
             runlen++;
         } else {
-            snprintf(append, sizeof(append), "%d%c", runlen, prev);
-            strcat(retval, append);
+            retval[rp] = 48 + runlen;
+            retval[++rp] = prev;
+            rp++;
             runlen = 1;
         }
         prev = cur;
     }
 
     if (runlen > 0) {
-        snprintf(append, sizeof(append), "%d%c", runlen, prev);
-        strcat(retval, append);
+        retval[rp] = 48 + runlen;
+        retval[++rp] = prev;
+        rp++;
     }
+
+    retval[++rp] = '\0';
 
     return retval;
 }
