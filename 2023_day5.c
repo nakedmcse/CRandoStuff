@@ -47,12 +47,21 @@ void append(dynArray *array, mapping value) {
 // Maps go seed -> soil -> fertilizer -> water -> light -> temp -> humidity -> location
 // maps are dest start, source start, length
 // unmapped is 1-1
-long transform(dynArray *map, long value) {
+long transform(dynArray *map, long value, bool reverse) {
     for (int i = 0; i < map->count; i++) {
-        if (value >= map->values[i].sourceStart && value <= map->values[i].sourceStart + map->values[i].length) {
-            // In range
-            long offset = value - map->values[i].sourceStart;
-            return map->values[i].destStart + offset;
+        if (reverse) {
+            if (value >= map->values[i].destStart && value <= map->values[i].destStart + map->values[i].length) {
+                // In reverse range
+                long offset = value - map->values[i].destStart;
+                return map->values[i].sourceStart + offset;
+            }
+        }
+        else {
+            if (value >= map->values[i].sourceStart && value <= map->values[i].sourceStart + map->values[i].length) {
+                // In forward range
+                long offset = value - map->values[i].sourceStart;
+                return map->values[i].destStart + offset;
+            }
         }
     }
     return value;
@@ -62,13 +71,13 @@ long part1(maps* maps) {
     long minLocation = LONG_MAX;
     for (int i = 0; i < maps->seeds->count; i++) {
         long location = maps->seeds->values[i].destStart;
-        location = transform(maps->seed2soil, location);
-        location = transform(maps->soil2fertilizer, location);
-        location = transform(maps->fertilizer2water, location);
-        location = transform(maps->water2light, location);
-        location = transform(maps->light2temp, location);
-        location = transform(maps->temp2humidity, location);
-        location = transform(maps->humidity2location, location);
+        location = transform(maps->seed2soil, location, false);
+        location = transform(maps->soil2fertilizer, location, false);
+        location = transform(maps->fertilizer2water, location, false);
+        location = transform(maps->water2light, location, false);
+        location = transform(maps->light2temp, location, false);
+        location = transform(maps->temp2humidity, location, false);
+        location = transform(maps->humidity2location, location, false);
         if (location < minLocation) minLocation = location;
     }
     return minLocation;
@@ -85,27 +94,16 @@ bool isValidSeed(dynArray *seeds, long value) {
     return false;
 }
 
-long reverseTransform(dynArray *map, long value) {
-    for (int i = 0; i < map->count; i++) {
-        if (value >= map->values[i].destStart && value <= map->values[i].destStart + map->values[i].length) {
-            // In range
-            long offset = value - map->values[i].destStart;
-            return map->values[i].sourceStart + offset;
-        }
-    }
-    return value;
-}
-
 long part2(maps* maps) {
     long minLocation = LONG_MAX;
     for (long i = 0; i < 1000000000; i++) {
-        long location = reverseTransform(maps->humidity2location, i);
-        location = reverseTransform(maps->temp2humidity, location);
-        location = reverseTransform(maps->light2temp, location);
-        location = reverseTransform(maps->water2light, location);
-        location = reverseTransform(maps->fertilizer2water, location);
-        location = reverseTransform(maps->soil2fertilizer, location);
-        location = reverseTransform(maps->seed2soil, location);
+        long location = transform(maps->humidity2location, i, true);
+        location = transform(maps->temp2humidity, location, true);
+        location = transform(maps->light2temp, location, true);
+        location = transform(maps->water2light, location, true);
+        location = transform(maps->fertilizer2water, location, true);
+        location = transform(maps->soil2fertilizer, location, true);
+        location = transform(maps->seed2soil, location, true);
         if (isValidSeed(maps->seeds, location)) {
             minLocation = i;
             break;
