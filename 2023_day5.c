@@ -114,6 +114,19 @@ long part2(maps* maps) {
     return minLocation;
 }
 
+void readMap(FILE* file, dynArray* map) {
+    char *line = NULL;
+    size_t len = 0;
+
+    getline(&line, &len, file);  // Skip header
+    while (getline(&line, &len, file) != -1) {
+        if (strcmp(line,"\n") == 0) break;   // break on blank
+        mapping *temp = (mapping*)malloc(sizeof(mapping));
+        sscanf(line, "%ld %ld %ld", &temp->destStart, &temp->sourceStart, &temp->length);
+        append(map, *temp);
+    }
+}
+
 void getMaps(maps* maps) {
     FILE* file = fopen("2023_day5_input.txt", "r");
     char *line = NULL;
@@ -133,67 +146,31 @@ void getMaps(maps* maps) {
 
     // Seed 2 Soil
     getline(&line, &len, file);  // Skip blank
-    getline(&line, &len, file);  // Skip header
-    while (getline(&line, &len, file) != -1) {
-        if (strcmp(line,"\n") == 0) break;   // break on blank
-        mapping *temp = (mapping*)malloc(sizeof(mapping));
-        sscanf(line, "%ld %ld %ld", &temp->destStart, &temp->sourceStart, &temp->length);
-        append(maps->seed2soil, *temp);
-    }
+    readMap(file, maps->seed2soil);
 
     // Soil 2 Fertilizer
     getline(&line, &len, file);  // Skip header
-    while (getline(&line, &len, file) != -1) {
-        if (strcmp(line,"\n") == 0) break;   // break on blank
-        mapping *temp = (mapping*)malloc(sizeof(mapping));
-        sscanf(line, "%ld %ld %ld", &temp->destStart, &temp->sourceStart, &temp->length);
-        append(maps->soil2fertilizer, *temp);
-    }
+    readMap(file, maps->soil2fertilizer);
 
     // Fertilizer 2 Water
     getline(&line, &len, file);  // Skip header
-    while (getline(&line, &len, file) != -1) {
-        if (strcmp(line,"\n") == 0) break;   // break on blank
-        mapping *temp = (mapping*)malloc(sizeof(mapping));
-        sscanf(line, "%ld %ld %ld", &temp->destStart, &temp->sourceStart, &temp->length);
-        append(maps->fertilizer2water, *temp);
-    }
+    readMap(file, maps->fertilizer2water);
 
     // Water 2 Light
     getline(&line, &len, file);  // Skip header
-    while (getline(&line, &len, file) != -1) {
-        if (strcmp(line,"\n") == 0) break;   // break on blank
-        mapping *temp = (mapping*)malloc(sizeof(mapping));
-        sscanf(line, "%ld %ld %ld", &temp->destStart, &temp->sourceStart, &temp->length);
-        append(maps->water2light, *temp);
-    }
+    readMap(file, maps->water2light);
 
     // Light 2 Temp
     getline(&line, &len, file);  // Skip header
-    while (getline(&line, &len, file) != -1) {
-        if (strcmp(line,"\n") == 0) break;   // break on blank
-        mapping *temp = (mapping*)malloc(sizeof(mapping));
-        sscanf(line, "%ld %ld %ld", &temp->destStart, &temp->sourceStart, &temp->length);
-        append(maps->light2temp, *temp);
-    }
+    readMap(file, maps->light2temp);
 
     // Temp 2 Humidity
     getline(&line, &len, file);  // Skip header
-    while (getline(&line, &len, file) != -1) {
-        if (strcmp(line,"\n") == 0) break;   // break on blank
-        mapping *temp = (mapping*)malloc(sizeof(mapping));
-        sscanf(line, "%ld %ld %ld", &temp->destStart, &temp->sourceStart, &temp->length);
-        append(maps->temp2humidity, *temp);
-    }
+    readMap(file, maps->temp2humidity);
 
     // Humidity 2 Location
     getline(&line, &len, file);  // Skip header
-    while (getline(&line, &len, file) != -1) {
-        if (strcmp(line,"\n") == 0) break;   // break on blank
-        mapping *temp = (mapping*)malloc(sizeof(mapping));
-        sscanf(line, "%ld %ld %ld", &temp->destStart, &temp->sourceStart, &temp->length);
-        append(maps->humidity2location, *temp);
-    }
+    readMap(file, maps->humidity2location);
 
     fclose(file);
 
