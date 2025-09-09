@@ -11,14 +11,7 @@ typedef struct point {
 } point;
 
 typedef struct moves {
-    point upleft;
-    point upright;
-    point downleft;
-    point downright;
-    point leftup;
-    point leftdown;
-    point rightup;
-    point rightdown;
+    point moves[8];
 } moves;
 
 typedef struct pointQueue {
@@ -66,51 +59,25 @@ bool isComplete(point p) {
 }
 
 moves getMoves(point p) {
-    moves m = {{-1,-1},{-1,-1},{-1,-1},{-1,-1},
-                {-1, -1}, {-1, -1}, {-1, -1}, {-1,-1}};
+    point validMoves[8] = {
+        {1, 2 }, {1, -2},
+        {-1, 2 }, {-1, -2},
+        {2, 1}, {2, -1},
+        {-2, 1}, {-2, -1}
+    };
 
-    if (isValid(p.x+1, p.y+2) && p.visited[p.x+1][p.y+2] == false) {
-        m.upright.x = p.x + 1;
-        m.upright.y = p.y + 2;
-        memcpy(m.upright.visited, p.visited, 64 * sizeof(bool));
-    }
-    if (isValid(p.x-1, p.y+2) && p.visited[p.x-1][p.y+2] == false) {
-        m.upleft.x = p.x - 1;
-        m.upleft.y = p.y + 2;
-        memcpy(m.upleft.visited, p.visited, 64 * sizeof(bool));
-    }
-    if (isValid(p.x+1, p.y-2) && p.visited[p.x+1][p.y-2] == false) {
-        m.downright.x = p.x + 1;
-        m.downright.y = p.y - 2;
-        memcpy(m.downright.visited, p.visited, 64 * sizeof(bool));
-    }
-    if (isValid(p.x-1, p.y-2) && p.visited[p.x-1][p.y-2] == false) {
-        m.downleft.x = p.x - 1;
-        m.downleft.y = p.y - 2;
-        memcpy(m.downleft.visited, p.visited, 64 * sizeof(bool));
-    }
-    if (isValid(p.x+2, p.y+1) && p.visited[p.x+2][p.y+1] == false) {
-        m.rightup.x = p.x + 2;
-        m.rightup.y = p.y + 1;
-        memcpy(m.rightup.visited, p.visited, 64 * sizeof(bool));
-    }
-    if (isValid(p.x+2, p.y-1) && p.visited[p.x+2][p.y-1] == false) {
-        m.rightdown.x = p.x + 2;
-        m.rightdown.y = p.y - 1;
-        memcpy(m.rightdown.visited, p.visited, 64 * sizeof(bool));
-    }
-    if (isValid(p.x-2, p.y+1) && p.visited[p.x-2][p.y+1] == false) {
-        m.leftup.x = p.x - 2;
-        m.leftup.y = p.y + 1;
-        memcpy(m.leftup.visited, p.visited, 64 * sizeof(bool));
-    }
-    if (isValid(p.x-2, p.y-1) && p.visited[p.x-2][p.y-1] == false) {
-        m.leftdown.x = p.x - 2;
-        m.leftdown.y = p.y - 1;
-        memcpy(m.leftdown.visited, p.visited, 64 * sizeof(bool));
+    moves retMoves;
+    int modX, modY = 0;
+    for (int i = 0; i < 8; i++) {
+        modX = p.x + validMoves[i].x; modY = p.y + validMoves[i].y;
+        retMoves.moves[i] = (point){-1, -1};
+        if (isValid(modX, modY) && p.visited[modX][modY] == false) {
+            retMoves.moves[i].x = modX; retMoves.moves[i].y = modY;
+            memcpy(retMoves.moves[i].visited, p.visited, sizeof(bool) * 64);
+        }
     }
 
-    return m;
+    return retMoves;
 }
 
 int knightstour(point p) {
@@ -126,18 +93,14 @@ int knightstour(point p) {
         if (isComplete(next)) {
             // Tour Completed
             solutions++;
+            printf("%d\n", solutions);
             continue;
         }
 
         moves m = getMoves(next);
-        if (m.upleft.x != -1 && m.upleft.y != -1) append(&queue, m.upleft);
-        if (m.upright.x != -1 && m.upright.y != -1) append(&queue, m.upright);
-        if (m.downleft.x != -1 && m.downleft.y != -1) append(&queue, m.downleft);
-        if (m.downright.x != -1 && m.downright.y != -1) append(&queue, m.downright);
-        if (m.leftup.x != -1 && m.leftup.y != -1) append(&queue, m.leftup);
-        if (m.leftdown.x != -1 && m.leftdown.y != -1) append(&queue, m.leftdown);
-        if (m.rightup.x != -1 && m.rightup.y != -1) append(&queue, m.rightup);
-        if (m.rightdown.x != -1 && m.rightdown.y != -1) append(&queue, m.rightdown);
+        for (int i = 0; i < 8; i++) {
+            if (m.moves[i].x != -1) append(&queue, m.moves[i]);
+        }
     }
     return solutions;
 }
@@ -145,6 +108,6 @@ int knightstour(point p) {
 int main(void) {
     point start = {2, 2};
     memset(start.visited, false, sizeof(bool) * 64);
-    printf("Knights Tour solutions from point (2,2) - %d\n", knightstour(start));
+    printf("Knights Tour from point (2,2) - %d\n", knightstour(start));
     return 0;
 }
