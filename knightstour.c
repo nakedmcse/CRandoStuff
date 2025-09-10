@@ -90,7 +90,7 @@ int countMoves(moves m) {
 
 moves getMinimalForwardMoves(moves o) {
     moves retMoves;
-    int moveCounts[8] = {9999,9999,9999,9999,9999,9999,9999,99999};
+    int moveCounts[8] = {9999,9999,9999,9999,9999,9999,9999,9999};
     int minMoves = 9999;
     for (int i = 0; i < 8; i++) {
         if (o.moves[i].x != -1) moveCounts[i] = countMoves(getMoves(o.moves[i]));
