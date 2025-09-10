@@ -80,6 +80,29 @@ moves getMoves(point p) {
     return retMoves;
 }
 
+int countMoves(moves m) {
+    int count = 0;
+    for (int i = 0; i < 8; i++) {
+        if (m.moves[i].x != -1) count++;
+    }
+    return count;
+}
+
+moves getMinimalForwardMoves(moves o) {
+    moves retMoves;
+    int moveCounts[8] = {9999,9999,9999,9999,9999,9999,9999,99999};
+    int minMoves = 9999;
+    for (int i = 0; i < 8; i++) {
+        if (o.moves[i].x != -1) moveCounts[i] = countMoves(getMoves(o.moves[i]));
+        if (moveCounts[i] < minMoves) minMoves = moveCounts[i];
+    }
+    for (int i = 0; i < 8; i++) {
+        if (moveCounts[i] == minMoves) retMoves.moves[i] = o.moves[i];
+        else { retMoves.moves[i].x = -1; retMoves.moves[i].y = -1; }
+    }
+    return retMoves;
+}
+
 int knightstour(point p) {
     int solutions = 0;
     pointQueue queue = {NULL, 0, 0};
@@ -93,11 +116,10 @@ int knightstour(point p) {
         if (isComplete(next)) {
             // Tour Completed
             solutions++;
-            printf("%d\n", solutions);
             continue;
         }
 
-        moves m = getMoves(next);
+        moves m = getMinimalForwardMoves(getMoves(next));
         for (int i = 0; i < 8; i++) {
             if (m.moves[i].x != -1) append(&queue, m.moves[i]);
         }
