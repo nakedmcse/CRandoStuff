@@ -22,7 +22,7 @@ void init(fastClear *clear, int capacity) {
 
 void set(fastClear *clear, int index, bool value) {
     if (index >= 0 && index < clear->capacity) {
-        clear->values[index] = clear->falseValue+1;
+        clear->values[index] = value ? clear->falseValue+1 : clear->falseValue;
     }
 }
 
