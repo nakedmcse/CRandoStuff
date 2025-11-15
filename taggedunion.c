@@ -7,13 +7,28 @@ typedef struct {
     double side;
 } Square;
 
+double squareArea(void *object) {
+    const Square *square = (const Square *)object;
+    return square->side * square->side;
+}
+
 typedef struct {
     double length, width;
 } Rectangle;
 
+double rectangleArea(void *object) {
+    const Rectangle *rectangle = (const Rectangle *)object;
+    return rectangle->length * rectangle->width;
+}
+
 typedef struct {
     double radius;
 } Circle;
+
+double circleArea(void *object) {
+    const Circle *circle = (const Circle *)object;
+    return (circle->radius * circle->radius) * 3.14;
+}
 
 // Tag
 typedef enum {
@@ -30,6 +45,7 @@ typedef struct {
         Rectangle rectangle;
         Circle circle;
     } data;
+    double (*area)(void *);
 } Shape;
 
 // Dynamic Array of Shapes
@@ -59,19 +75,36 @@ int main(void) {
     Shape square;
     square.type = SHAPE_SQUARE;
     square.data.square.side = 5.0;
+    square.area = (void *)&squareArea;
 
     Shape rectangle;
     rectangle.type = SHAPE_RECTANGLE;
     rectangle.data.rectangle.length = 5.0;
     rectangle.data.rectangle.width = 10.0;
+    rectangle.area = (void *)&rectangleArea;
 
     Shape circle;
     circle.type = SHAPE_CIRCLE;
     circle.data.circle.radius = 5.0;
+    circle.area = (void *)&circleArea;
 
     append(&array, square);
     append(&array, rectangle);
     append(&array, circle);
+
+    for (size_t i = 0; i < array.count; i++) {
+        switch (array.values[i].type) {
+            case SHAPE_SQUARE:
+                printf("Square, area %f\n", array.values[i].area((void *)&array.values[i].data.square));
+                break;
+            case SHAPE_RECTANGLE:
+                printf("Rectangle, area %f\n", array.values[i].area((void *)&array.values[i].data.rectangle));
+                break;
+            case SHAPE_CIRCLE:
+                printf("Circle, area %f\n", array.values[i].area((void *)&array.values[i].data.circle));
+                break;
+        }
+    }
 
     return 0;
 }
