@@ -15,8 +15,8 @@ int main(void) {
     long t = 0;
     clock_t start_time = clock();
     while (!checkWinner()) {
-        t += 1;
-        for (int i = 0; i < 7; i++) discPositions[i] = (discPositions[i] + 1) % discSize[i];
+        t += 17;
+        for (int i = 0; i < 7; i++) discPositions[i] = (discPositions[i] + 17) % discSize[i];
     }
     double elapsed = (double)(clock() - start_time) / CLOCKS_PER_SEC;
     printf("Part 2 Timestamp: %ld in %fs\n", t, elapsed);
