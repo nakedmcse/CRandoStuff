@@ -23,11 +23,9 @@ point2 project(point3 p) {
 }
 
 point3 rotate(const point3 p, const double angle) {
-    const point3 r = {
-        p.x * cos(angle) - p.z * sin(angle),
-            p.y,
-        (p.x * sin(angle) + p.z * cos(angle))+0.5,
-    };
+    const double s = sin(angle);
+    const double c = cos(angle);
+    const point3 r = {p.x * c - p.z * s, p.y, (p.x * s + p.z * c)+0.5};
     return r;
 }
 
