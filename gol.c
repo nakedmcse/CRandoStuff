@@ -63,13 +63,9 @@ int main(void) {
         for (int y = 0; y < HEIGHT; y++) {
             for (int x = 0; x < WIDTH; x++) {
                 const int n = countNeighbours(grid, x, y);
-                if (previousGrid[y][x] == '#' && (n<2 || n>3)) {
-                    grid[y][x] = ' ';
-                    continue;
-                }
-                if (previousGrid[y][x] == ' ' && n == 3) {
-                    grid[y][x] = '#';
-                }
+                bool flip = (previousGrid[y][x] == '#' && (n < 2 || n > 3))
+                    || (previousGrid[y][x] == ' ' && n == 3);
+                if (flip) grid[y][x] = previousGrid[y][x] == '#' ? ' ' : '#';
             }
         }
         renderGeneration(grid);
