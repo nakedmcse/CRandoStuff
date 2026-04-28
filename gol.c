@@ -1,6 +1,7 @@
 // Game of Life
 #define WIDTH 80
 #define HEIGHT 40
+#define MAXGENERATIONS 400
 #include<stdio.h>
 #include<stdbool.h>
 #include<stdlib.h>
@@ -51,9 +52,13 @@ bool checkAllDead(char grid[][WIDTH]) {
 int main(void) {
     char grid[HEIGHT][WIDTH];
     char previousGrid[HEIGHT][WIDTH];
+    int i = 0;
+
+    memset(grid, ' ', sizeof(char) * HEIGHT * WIDTH);
+    memset(previousGrid, ' ', sizeof(char) * HEIGHT * WIDTH);
 
     setRandomPatch(grid, 30, 15, 20, 10);
-    while (!checkAllDead(grid)) {
+    while (!checkAllDead(grid) && i<MAXGENERATIONS) {
         memcpy(previousGrid, grid, WIDTH * HEIGHT * sizeof(char));
         for (int y = 0; y < HEIGHT; y++) {
             for (int x = 0; x < WIDTH; x++) {
@@ -69,7 +74,7 @@ int main(void) {
         }
         renderGeneration(grid);
         printf("\n");
+        i++;
     }
-    printf("Colony died\n");
     return 0;
 }
